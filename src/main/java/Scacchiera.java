@@ -7,8 +7,9 @@ import javax.swing.JFrame;
 
 public class Scacchiera extends JFrame {
   private static final long serialVersionUID = 1L;
-  
-  private static final int ROW = 4;
+  private static final int ROW = 8;
+  private static final int WAIT_MS = 10;
+
   private final JButton[][] caselle = new JButton[ROW][ROW];
   private final int[] colonne = new int[ROW];
   private final ImageIcon imgRegina;
@@ -44,6 +45,7 @@ public class Scacchiera extends JFrame {
     while (numRegina < ROW) {
       this.colonne[numRegina] = this.colonne[numRegina] + 1;
       if (this.colonne[numRegina] < ROW) {
+        this.disegnaRiga(numRegina);
         if (this.reginaOk(numRegina)) {
           numRegina++;
         }
@@ -51,56 +53,49 @@ public class Scacchiera extends JFrame {
         // non ho trovato una posizione per la regina numRegina, quindi
         // torno a cambiare la posizione della regina precedente
         this.colonne[numRegina] = -1;
-        
+        this.disegnaRiga(numRegina);
         numRegina--;
       }
-      this.disegnaRegine();
+    }
+  }
+
+  private boolean reginaOk(int numRegina) {
+    // due regine non possono occupare la stessa colonna
+    final int colonnaReginaAttuale = this.colonne[numRegina];
+    // due regine non possono stare sulla stessa diagonale principale
+    final int diagonalePrincipaleReginaAttuale = numRegina - this.colonne[numRegina];
+    // due regine non possono stare sulla stessa diagonale secondaria
+    final int diagonaleSecondariaReginaAttuale = numRegina + this.colonne[numRegina];
+
+    for (int r = 0; r < numRegina; r++) {
+      if (colonnaReginaAttuale == this.colonne[r]) {
+        return false;
+      }
+      if (diagonalePrincipaleReginaAttuale == r - this.colonne[r]) {
+        return false;
+      }
+      if (diagonaleSecondariaReginaAttuale == r + this.colonne[r]) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  private void disegnaRiga(int riga) {
+    for (int c = 0; c < ROW; c++) {
+      this.caselle[riga][c].setIcon(null);
+    }
+    if (-1 != colonne[riga]) {
+      this.caselle[riga][colonne[riga]].setIcon(this.imgRegina);
+    }
+
+    if (WAIT_MS > 0) {
       try {
-        Thread.sleep(1000);
+        Thread.sleep(WAIT_MS);
       } catch (InterruptedException exc) {
         // ignoro l'eccezione
       }
     }
   }
 
-  
-  private boolean reginaOk(int numRegina) {
-    // due regine non possono occupare la stessa colonna
-    final int colonnaReginaAttuale = this.colonne[numRegina];
-    for (int r = 0; r < numRegina; r++) {
-      if (colonnaReginaAttuale == this.colonne[r]) {
-        return false;
-      }
-    }
-    
-    // due regine non possono stare sulla stessa diagonale principale
-    final int diagonalePrincipaleReginaAttuale = numRegina - this.colonne[numRegina];
-    for (int r = 0; r < numRegina; r++) {
-      if (diagonalePrincipaleReginaAttuale == r - this.colonne[r]) {
-        return false;
-      }
-    }
-    
-    // due regine non possono stare sulla stessa diagonale secondaria
-    final int diagonaleSecondariaReginaAttuale = numRegina + this.colonne[numRegina];
-    for (int r = 0; r < numRegina; r++) {
-      if (diagonaleSecondariaReginaAttuale == r + this.colonne[r]) {
-        return false;
-      }
-    }
-    
-    return true;
-  }
-  
-  
-  private void disegnaRegine() {
-    for (int r = 0; r < ROW; r++) {
-      for (int c= 0; c < ROW; c++) {
-        this.caselle[r][c].setIcon(null);
-      }
-      if (-1 != colonne[r]) {
-        this.caselle[r][colonne[r]].setIcon(this.imgRegina);
-      }
-    }
-  }
 }
